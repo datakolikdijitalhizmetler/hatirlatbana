@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="tr" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notlar ve Görevler</title>
+    <link rel="stylesheet" href="/src/style.css">
+    <!-- Fluent Icons -->
+    <link href="https://res.cdn.office.net/files/fabric-cdn-prod_20230815.002/office-ui-fabric-core/11.0.0/css/fabric.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="app-container">
+      <nav class="sidebar">
+        <div class="sidebar-header" id="sidebar-toggle" style="cursor: pointer;">
+          <i class="ms-Icon ms-Icon--GlobalNavButton" aria-hidden="true"></i>
+        </div>
+        <ul class="nav-list">
+          <li class="nav-item active" data-target="notes-view">
+            <i class="ms-Icon ms-Icon--QuickNote" aria-hidden="true"></i>
+            <span class="nav-text"><span data-i18n="sidebarNotes">Notlar</span> <span id="sidebar-notes-count" style="margin-left:5px; opacity:0.7; font-size:0.85em;"></span></span>
+          </li>
+          <li class="nav-item" data-target="reminders-view" data-filter="all">
+            <i class="ms-Icon ms-Icon--CheckList" aria-hidden="true"></i>
+            <span class="nav-text"><span data-i18n="sidebarTasks">Görevler</span> <span id="sidebar-tasks-count" style="margin-left:5px; opacity:0.7; font-size:0.85em;"></span></span>
+          </li>
+          <ul class="sub-nav-list" id="tasks-sub-nav">
+            <li class="nav-item sub-item" data-target="reminders-view" data-filter="today">
+              <i class="ms-Icon ms-Icon--CalendarDay" aria-hidden="true"></i>
+              <span class="sub-item-text"><span data-i18n="sidebarToday">Bugün</span> <span id="count-today" class="filter-badge"></span></span>
+            </li>
+            <li class="nav-item sub-item" data-target="reminders-view" data-filter="tomorrow">
+              <i class="ms-Icon ms-Icon--CalendarAgenda" aria-hidden="true"></i>
+              <span class="sub-item-text"><span data-i18n="sidebarTomorrow">Yarın</span> <span id="count-tomorrow" class="filter-badge"></span></span>
+            </li>
+            <li class="nav-item sub-item" data-target="reminders-view" data-filter="upcoming">
+              <i class="ms-Icon ms-Icon--CalendarReply" aria-hidden="true"></i>
+              <span class="sub-item-text"><span data-i18n="sidebarUpcoming">İleri Tarihli</span> <span id="count-upcoming" class="filter-badge"></span></span>
+            </li>
+            <li class="nav-item sub-item" data-target="reminders-view" data-filter="yesterday">
+              <i class="ms-Icon ms-Icon--EventDate" aria-hidden="true"></i>
+              <span class="sub-item-text"><span data-i18n="sidebarYesterday">Dün</span> <span id="count-yesterday" class="filter-badge"></span></span>
+            </li>
+            <li class="nav-item sub-item" data-target="reminders-view" data-filter="older">
+              <i class="ms-Icon ms-Icon--History" aria-hidden="true"></i>
+              <span class="sub-item-text"><span data-i18n="sidebarOlder">Öncekiler</span> <span id="count-older" class="filter-badge"></span></span>
+            </li>
+            <li class="nav-item sub-item" data-target="reminders-view" data-filter="nodate">
+              <i class="ms-Icon ms-Icon--StatusCircleRing" aria-hidden="true"></i>
+              <span class="sub-item-text"><span data-i18n="sidebarNoDate">Tarih Yok</span> <span id="count-nodate" class="filter-badge"></span></span>
+            </li>
+            <li class="nav-item sub-item" data-target="reminders-view" data-filter="completed">
+              <i class="ms-Icon ms-Icon--Accept" aria-hidden="true"></i>
+              <span class="sub-item-text"><span data-i18n="sidebarCompleted">Tamamlananlar</span> <span id="count-completed" class="filter-badge"></span></span>
+            </li>
+          </ul>
+        </ul>
+        
+        <a href="https://datakolik.net/" target="_blank" class="sidebar-logo-link" title="DataKolik">
+          <img src="./datakolik-logo-light.svg" alt="DataKolik" class="sidebar-logo light-mode-logo">
+          <img src="./datakolik-logo-dark.svg" alt="DataKolik" class="sidebar-logo dark-mode-logo">
+        </a>
+        
+        <div class="sidebar-footer">
+          <li class="nav-item" data-target="settings-view" style="list-style-type: none;">
+            <i class="ms-Icon ms-Icon--Settings" aria-hidden="true"></i>
+            <span data-i18n="sidebarSettings">Ayarlar</span>
+          </li>
+        </div>
+      </nav>
+
+      <main class="content-area">
+        <!-- Update Banner -->
+        <div id="update-banner" style="display:none; align-items:center; gap:12px; background:var(--accent-color); color:#fff; padding:10px 20px; font-size:0.9rem; position:sticky; top:0; z-index:100;">
+          <i class="ms-Icon ms-Icon--Download" style="font-size:1.1rem;"></i>
+          <span id="update-banner-text">Güncelleme indiriliyor...</span>
+          <button id="update-install-btn" style="display:none; background:#fff; color:var(--accent-color); border:none; border-radius:4px; padding:4px 14px; font-weight:600; cursor:pointer;">Şimdi Kur</button>
+          <button id="update-dismiss-btn" style="margin-left:auto; background:transparent; color:#fff; border:none; cursor:pointer; font-size:1.1rem;" title="Kapat">✕</button>
+        </div>
+        <!-- Notes View -->
+        <section id="notes-view" class="view active">
+          <header class="view-header">
+            <h1 data-i18n="notesTitle">Notlar</h1>
+            <div class="header-actions">
+              <input type="text" id="notes-search" class="fluent-input" placeholder="Notlarda ara..." data-i18n-placeholder="notesSearchPlaceholder" style="margin-bottom:0; width:200px;">
+              <select id="notes-sort" class="fluent-select" style="margin-bottom:0; width:180px;">
+                <option value="newest" data-i18n="notesSortNewest">En Yeni</option>
+                <option value="oldest" data-i18n="notesSortOldest">En Eski</option>
+                <option value="updated" data-i18n="notesSortUpdated">Son Düzenlenen</option>
+              </select>
+              <button class="fluent-btn primary" id="add-note-btn">
+                <i class="ms-Icon ms-Icon--Add" aria-hidden="true"></i> <span data-i18n="notesAddBtn">Yeni Not</span>
+              </button>
+            </div>
+          </header>
+          <div class="notes-grid" id="notes-container">
+            <!-- Notes will be injected here -->
+          </div>
+        </section>
+
+        <section id="reminders-view" class="view">
+          <header class="view-header">
+            <h1 data-i18n="tasksTitle">Görevler</h1>
+            <div class="header-actions">
+              <input type="text" id="reminders-search" class="fluent-input" placeholder="Görevlerde ara..." data-i18n-placeholder="tasksSearchPlaceholder" style="margin-bottom:0; width:200px;">
+              <select id="reminders-sort" class="fluent-select" style="margin-bottom:0; width:180px;">
+                <option value="dueDate" data-i18n="tasksSortDue">Bitiş Tarihine Göre</option>
+                <option value="newest" data-i18n="notesSortNewest">En Yeni</option>
+                <option value="oldest" data-i18n="notesSortOldest">En Eski</option>
+                <option value="updated" data-i18n="notesSortUpdated">Son Düzenlenen</option>
+              </select>
+              <button class="fluent-btn primary" id="add-reminder-btn">
+                <i class="ms-Icon ms-Icon--Add" aria-hidden="true"></i> <span data-i18n="tasksAddBtn">Yeni Görev</span>
+              </button>
+            </div>
+          </header>
+          <div class="reminders-list" id="reminders-container">
+            <!-- Reminders will be injected here -->
+          </div>
+        </section>
+
+        <!-- Settings View -->
+        <section id="settings-view" class="view">
+          <header class="view-header">
+            <div>
+              <h1 data-i18n="settingsTitle">Ayarlar</h1>
+              <span style="font-size: 0.85em; color: var(--text-secondary); margin-top: 5px; display: inline-block;">
+                <i class="ms-Icon ms-Icon--Save" aria-hidden="true"></i> <span data-i18n="settingsAutoSave">Ayarlarınız değiştirildiğinde otomatik olarak kaydedilir.</span>
+              </span>
+            </div>
+          </header>
+          <div class="settings-container" style="padding: 20px; max-width: 600px;">
+            <div class="card mb-3" style="margin-bottom: 20px;">
+              <div class="card-title" data-i18n="settingsAppearance">Görünüm</div>
+              <div class="settings-content mt-2">
+                <button class="fluent-btn" id="theme-toggle-btn">
+                  <i class="ms-Icon ms-Icon--Color" aria-hidden="true"></i> <span data-i18n="settingsThemeBtn">Temayı Değiştir (Aydınlık / Karanlık)</span>
+                </button>
+              </div>
+            </div>
+
+            
+            <div class="card mb-3" style="margin-bottom: 20px;">
+              <div class="card-title" data-i18n="settingsLanguage">Dil / Language</div>
+              <div class="settings-content mt-2">
+                <select id="language-select" class="fluent-select">
+                  <option value="tr">Türkçe</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="card mb-3" style="margin-bottom: 20px;">
+              <div class="card-title" data-i18n="settingsNotification">Bildirim Ayarları</div>
+              <div class="settings-content mt-2">
+                <label style="display: block; margin-bottom: 5px; color: var(--text-primary); font-weight: 500;" data-i18n="settingsSnoozeLabel">Erteleme Süresi</label>
+                <select id="snooze-duration" class="fluent-select">
+                  <option value="5" data-i18n="settingsSnooze5">5 Dakika</option>
+                  <option value="10" data-i18n="settingsSnooze10">10 Dakika</option>
+                  <option value="15" data-i18n="settingsSnooze15">15 Dakika</option>
+                  <option value="30" data-i18n="settingsSnooze30">30 Dakika</option>
+                  <option value="60" data-i18n="settingsSnooze60">1 Saat</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="card mb-3" style="margin-bottom: 20px;">
+              <div class="card-title" data-i18n="settingsSystem">Sistem Ayarları</div>
+              <div class="settings-content mt-2">
+                <label class="fluent-checkbox" style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+                  <input type="checkbox" id="autostart-toggle" style="width: 18px; height: 18px;">
+                  <span data-i18n="settingsAutostart">Bilgisayar açıldığında otomatik başlat (Arka planda gizli başlar)</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="card mb-3" style="margin-bottom: 20px;">
+              <div class="card-title" data-i18n="settingsData">Veri Yönetimi</div>
+              <div class="settings-content mt-2">
+                <p style="color: var(--text-secondary); margin-bottom: 15px;"><span data-i18n="settingsDataDesc">Verilerinizi yedekleyebilir veya başka bir bilgisayardan içe aktarabilirsiniz. İçe aktarma işlemi mevcut verilerinizin üzerine yazacaktır.</span></p>
+                <div style="display: flex; gap: 15px;">
+                  <button class="fluent-btn primary" id="export-data-btn">
+                    <i class="ms-Icon ms-Icon--Download" aria-hidden="true"></i> <span data-i18n="settingsExportBtn">Dışa Aktar (Yedekle)</span>
+                  </button>
+                  <button class="fluent-btn" id="import-data-btn">
+                    <i class="ms-Icon ms-Icon--Upload" aria-hidden="true"></i> <span data-i18n="settingsImportBtn">İçe Aktar (Geri Yükle)</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mb-3" style="margin-bottom: 20px;">
+              <div class="card-title" data-i18n="settingsFeedback">Geri Bildirim / İletişim</div>
+              <div class="settings-content mt-2">
+                <p style="color: var(--text-secondary); margin-bottom: 15px;"><span data-i18n="settingsFeedbackDesc">İsteklerinizi, hata bildirimlerinizi ve önerilerinizi bizimle paylaşmaktan çekinmeyin! Bize aşağıdaki e-posta adresinden ulaşabilirsiniz.</span></p>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  <i class="ms-Icon ms-Icon--Mail" aria-hidden="true" style="font-size: 1.2rem; color: var(--accent-color);"></i>
+                  <a href="mailto:hatirlatbana@datakolik.net" style="color: var(--accent-color); font-weight: 500; text-decoration: none;" data-i18n="settingsFeedbackEmail">hatirlatbana@datakolik.net</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="modal-overlay"></div>
+    
+    <!-- Note Modal -->
+    <div class="fluent-modal" id="note-modal">
+      <div class="modal-header">
+        <h2 id="note-modal-title" data-i18n="modalNewNote">Yeni Not</h2>
+        <button class="icon-btn close-modal"><i class="ms-Icon ms-Icon--Cancel" aria-hidden="true"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="note-title" class="fluent-input" placeholder="Başlık" data-i18n-placeholder="modalNoteTitle">
+        <textarea id="note-content" class="fluent-textarea" placeholder="Notunuzu buraya yazın..." data-i18n-placeholder="modalNoteContent"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="fluent-btn danger close-modal" data-i18n="modalNoteCancel">İptal</button>
+        <button class="fluent-btn primary" id="edit-note-btn" style="display: none;" data-i18n="modalNoteEdit">Düzenle</button>
+        <button class="fluent-btn primary" id="save-note-btn" data-i18n="modalNoteSave">Kaydet</button>
+      </div>
+    </div>
+
+    <!-- Reminder Modal -->
+    <div class="fluent-modal" id="reminder-modal">
+      <div class="modal-header">
+        <h2 id="reminder-modal-title" data-i18n="modalNewTask">Yeni Görev</h2>
+        <button class="icon-btn close-modal"><i class="ms-Icon ms-Icon--Cancel" aria-hidden="true"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="reminder-title" class="fluent-input" placeholder="Görev Başlığı" data-i18n-placeholder="modalTaskTitle">
+        <textarea id="reminder-note" class="fluent-textarea" placeholder="Görev için not (opsiyonel)..." data-i18n-placeholder="modalTaskNote" style="min-height: 80px;"></textarea>
+        
+        <div class="reminder-options">
+          
+          <label class="fluent-label mt-3" data-i18n="modalTaskDue">Son Tarih</label>
+          <input type="date" id="task-due-date" class="fluent-input">
+
+          <label class="fluent-checkbox mt-3" style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+            <input type="checkbox" id="task-has-alarm" style="width: 18px; height: 18px;">
+            <span data-i18n="modalTaskAlarm">Bana Hatırlat (Alarm Kur)</span>
+          </label>
+
+          <div id="alarm-settings-container" style="display: none; padding-left: 20px; border-left: 2px solid var(--accent-color); margin-top: 10px;">
+            <label class="fluent-label" data-i18n="modalTaskAlarmTime">Hatırlatma Saati</label>
+            <input type="time" id="reminder-time" class="fluent-input">
+
+            <label class="fluent-label mt-3" data-i18n="modalTaskAlarmStart">Hatırlatma Başlangıç Tarihi</label>
+            <input type="date" id="reminder-start-date" class="fluent-input">
+          </div>
+
+          <label class="fluent-label mt-3" data-i18n="modalTaskRepeat">Yinelenir</label>
+          <div class="flex-row gap-2" style="align-items: flex-start;">
+            <input type="number" id="reminder-freq-num" class="fluent-input" min="1" max="99" value="1" style="flex: 0 0 80px; text-align: center; margin-bottom: 0;">
+            <select id="reminder-freq-type" class="fluent-select" style="flex: 1; margin-bottom: 0;">
+              <option value="once" data-i18n="modalTaskRepeatOnce">Bir Kez</option>
+              <option value="day" data-i18n="modalTaskRepeatDay">Gün</option>
+              <option value="week" data-i18n="modalTaskRepeatWeek">Hafta</option>
+              <option value="month" data-i18n="modalTaskRepeatMonth">Ay</option>
+            </select>
+          </div>
+
+          <div id="week-days-selector" class="week-days-container" style="display: none;">
+            <button class="day-btn" data-day="1">P</button>
+            <button class="day-btn" data-day="2">S</button>
+            <button class="day-btn" data-day="3">Ç</button>
+            <button class="day-btn" data-day="4">P</button>
+            <button class="day-btn" data-day="5">C</button>
+            <button class="day-btn" data-day="6">C</button>
+            <button class="day-btn" data-day="0">P</button>
+          </div>
+
+          <div id="repeat-end-container" style="display: none;">
+            <label class="fluent-label mt-3" data-i18n="modalTaskEnd">Bitiş (Yinelenen Görevler İçin)</label>
+            <div class="radio-group">
+              <label class="fluent-radio">
+                <input type="radio" name="end-type" value="never" checked>
+                <span class="radio-mark"></span>
+                <span data-i18n="modalTaskEndNever">Hiçbir zaman</span>
+              </label>
+              <label class="fluent-radio mt-2">
+                <input type="radio" name="end-type" value="date">
+                <span class="radio-mark"></span>
+                <span data-i18n="modalTaskEndOnDate">Şu tarihte:</span>
+              </label>
+            </div>
+            <input type="date" id="reminder-end-date" class="fluent-input mt-2" disabled>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="fluent-btn danger close-modal" data-i18n="modalNoteCancel">İptal</button>
+        <button class="fluent-btn primary" id="edit-reminder-btn" style="display: none;" data-i18n="modalNoteEdit">Düzenle</button>
+        <button class="fluent-btn primary" id="save-reminder-btn" data-i18n="modalNoteSave">Kaydet</button>
+      </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="fluent-modal" id="confirm-modal" style="max-width: 360px;">
+      <div class="modal-body" style="padding-top: 30px; text-align: center;">
+        <i class="ms-Icon ms-Icon--Delete" style="font-size: 2.5rem; color: #d83b01; margin-bottom: 15px; display: inline-block;" aria-hidden="true"></i>
+        <h3 style="margin-bottom: 10px; font-weight: 600;" data-i18n="modalConfirmTitle">Emin misiniz?</h3>
+        <p id="confirm-message" style="color: var(--text-secondary); line-height: 1.5; font-size: 0.95rem;">Bu öğeyi silmek istediğinize emin misiniz?</p>
+      </div>
+      <div class="modal-footer" style="justify-content: center; border-top: none; padding-bottom: 25px; background: transparent;">
+        <button class="fluent-btn danger" id="confirm-cancel-btn" style="min-width: 100px;" data-i18n="modalConfirmCancel">İptal</button>
+        <button class="fluent-btn primary" id="confirm-ok-btn" style="min-width: 100px;" data-i18n="modalConfirmDelete">Sil</button>
+      </div>
+    </div>
+
+    <!-- Simple Alert Modal -->
+    <div class="fluent-modal" id="alert-modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2 id="alert-modal-title" style="color: var(--accent-color); font-weight: 600;">
+          <i class="ms-Icon ms-Icon--Ringer" aria-hidden="true" style="margin-right: 8px;"></i><span data-i18n="modalAlertTitle">Hatırlatıcı</span>
+        </h2>
+        <button class="icon-btn close-modal"><i class="ms-Icon ms-Icon--Cancel" aria-hidden="true"></i></button>
+      </div>
+      <div class="modal-body" style="padding-top: 15px;">
+        <h3 id="alert-task-title" style="font-size: 1.2rem; font-weight: 600; margin-bottom: 10px;"></h3>
+        <p id="alert-task-desc" style="color: var(--text-secondary); line-height: 1.5; font-size: 0.95rem; white-space: pre-wrap; margin-bottom: 20px;"></p>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="fluent-btn danger" id="alert-snooze-btn"><span data-i18n="modalAlertSnoozePrefix">Ertele</span> (15 dk)</button>
+        <button class="fluent-btn primary" id="alert-complete-btn" data-i18n="modalAlertComplete">Tamamlandı</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

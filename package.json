@@ -1,0 +1,62 @@
+{
+  "name": "hatirlatbana",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "main.cjs",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"cross-env NODE_ENV=development electron .\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "pack": "electron-builder --dir",
+    "dist": "vite build && electron-builder",
+    "dist:publish": "vite build && electron-builder --publish always"
+  },
+  "build": {
+    "appId": "com.hatirlatbana.app",
+    "productName": "Hatırlat Bana",
+    "protocols": {
+      "name": "Hatirlat Bana Protocol",
+      "schemes": [
+        "hatirlatbana"
+      ]
+    },
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerSidebar": "sidebar.bmp",
+      "uninstallerSidebar": "sidebar.bmp",
+      "displayLanguageSelector": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "datakolikdijitalhizmetler",
+      "repo": "hatirlatbana"
+    },
+    "files": [
+      "dist/**/*",
+      "main.cjs",
+      "preload.cjs",
+      "icon.png",
+      "package.json"
+    ]
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3",
+    "cross-env": "^10.1.0",
+    "electron": "^43.0.0",
+    "electron-builder": "^26.15.3",
+    "jimp": "^1.6.1",
+    "vite": "^8.1.1"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  }
+}
