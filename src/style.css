@@ -68,7 +68,21 @@ body {
   font-size: 1.2rem;
   display: flex;
   justify-content: flex-start;
+  align-items: center;
   transition: padding 0.3s ease;
+}
+
+.app-version-sidebar {
+  margin-left: auto;
+  font-size: 0.75rem;
+  opacity: 0.5;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar.collapsed .app-version-sidebar {
+  display: none;
 }
 
 .sidebar.collapsed .sidebar-header {

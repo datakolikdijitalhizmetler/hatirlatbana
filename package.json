@@ -1,6 +1,6 @@
 {
   "name": "hatirlatbana",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "main": "main.cjs",
@@ -38,7 +38,8 @@
     "publish": {
       "provider": "github",
       "owner": "datakolikdijitalhizmetler",
-      "repo": "hatirlatbana"
+      "repo": "hatirlatbana",
+      "releaseType": "release"
     },
     "files": [
       "dist/**/*",

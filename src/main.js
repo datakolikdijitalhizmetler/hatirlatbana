@@ -312,11 +312,14 @@ async function init() {
     });
   }
 
-  // Show app version in settings
+  // Show app version in settings and sidebar
   if (window.api && window.api.getAppVersion) {
     window.api.getAppVersion().then(version => {
       const el = document.getElementById('app-version-display');
       if (el) el.textContent = `v${version}`;
+      
+      const sidebarEl = document.getElementById('sidebar-version-display');
+      if (sidebarEl) sidebarEl.textContent = `v${version}`;
     });
   }
 }
