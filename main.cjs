@@ -168,6 +168,11 @@ if (!gotTheLock) {
     setTimeout(() => {
       autoUpdater.checkForUpdates().catch(err => console.error('Update check failed:', err));
     }, 5000);
+
+    // Check for updates every 7 days while the app remains open
+    setInterval(() => {
+      autoUpdater.checkForUpdates().catch(err => console.error('Periodic update check failed:', err));
+    }, 7 * 24 * 60 * 60 * 1000);
   }
 });
 }
