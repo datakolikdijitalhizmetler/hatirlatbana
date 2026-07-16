@@ -6,16 +6,15 @@ const { shell, app } = require('electron');
 const url = require('url');
 const destroy = require('server-destroy');
 
-const p1 = '1091214843546-3pdg00j';
-const p2 = 'l92pm2l5h3krnglam60c87e6v.apps.googleu';
+const p1 = '1091214843546-3pdg00jj';
+const p2 = '92pm2l5h3krngiam60c87e6v.apps.googleu';
 const p3 = 'sercontent.com';
-const s1 = 'GOCSPX-DRcTS';
-const s2 = 'e5-G0ta6PR3';
-const s3 = 'p572cMxyYlFN';
+const s1 = 'GOCSPX-lNaD';
+const s2 = '9_n_NyeUuGAkYPizhX-pvJO2';
 
 const CREDENTIALS = {
   client_id: p1 + p2 + p3,
-  client_secret: s1 + s2 + s3,
+  client_secret: s1 + s2,
   redirect_uri: 'http://127.0.0.1:3000/oauth2callback'
 };
 
