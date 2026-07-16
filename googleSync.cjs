@@ -7,7 +7,7 @@ const url = require('url');
 const destroy = require('server-destroy');
 
 const p1 = '1091214843546-3pdg00j';
-const p2 = 'j92pm2l5h3krnglam60c87e6v.apps.googleu';
+const p2 = 'l92pm2l5h3krnglam60c87e6v.apps.googleu';
 const p3 = 'sercontent.com';
 const s1 = 'GOCSPX-DRcTS';
 const s2 = 'e5-G0ta6PR3';
