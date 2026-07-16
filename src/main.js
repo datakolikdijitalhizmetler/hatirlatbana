@@ -116,9 +116,11 @@ let confirmResolve = null;
 const confirmModal = document.getElementById('confirm-modal');
 const confirmMessageEl = document.getElementById('confirm-message');
 
-function showCustomConfirm(message) {
+function showCustomConfirm(message, confirmText = 'Sil') {
   return new Promise((resolve) => {
     confirmMessageEl.textContent = message;
+    const okBtn = document.getElementById('confirm-ok-btn');
+    okBtn.textContent = confirmText;
     confirmResolve = resolve;
     openModal(confirmModal);
   });
@@ -343,8 +345,7 @@ async function init() {
     await updateSyncUI();
 
     document.getElementById('google-login-btn')?.addEventListener('click', async () => {
-      if (window.api.showAlert) window.api.showAlert('Tarayıcınızda açılan sekmeden giriş yapın.');
-      else alert('Tarayıcınızda açılan sekmeden giriş yapın.');
+
       
       const success = await window.api.googleLogin();
       if (success) {
@@ -356,7 +357,7 @@ async function init() {
     });
 
     document.getElementById('google-logout-btn')?.addEventListener('click', async () => {
-      const isConfirmed = await showCustomConfirm('Google Drive bağlantısını kesmek istediğinize emin misiniz?');
+      const isConfirmed = await showCustomConfirm('Google Drive bağlantısını kesmek istediğinize emin misiniz?', 'Evet, Kes');
       if (!isConfirmed) return;
       await window.api.googleLogout();
       await updateSyncUI();
