@@ -322,6 +322,96 @@ async function init() {
       if (sidebarEl) sidebarEl.textContent = `v${version}`;
     });
   }
+
+  // Google Sync UI Setup
+  if (window.api && window.api.googleStatus) {
+    const updateSyncUI = async () => {
+      const isLoggedIn = await window.api.googleStatus();
+      const outDiv = document.getElementById('sync-logged-out');
+      const inDiv = document.getElementById('sync-logged-in');
+      if (outDiv && inDiv) {
+        if (isLoggedIn) {
+          outDiv.style.display = 'none';
+          inDiv.style.display = 'block';
+        } else {
+          outDiv.style.display = 'block';
+          inDiv.style.display = 'none';
+        }
+      }
+    };
+    
+    await updateSyncUI();
+
+    document.getElementById('google-login-btn')?.addEventListener('click', async () => {
+      if (window.api.showAlert) window.api.showAlert('Tarayıcınızda açılan sekmeden giriş yapın.');
+      else alert('Tarayıcınızda açılan sekmeden giriş yapın.');
+      
+      const success = await window.api.googleLogin();
+      if (success) {
+        await updateSyncUI();
+      } else {
+        if (window.api.showAlert) window.api.showAlert('Giriş başarısız oldu veya iptal edildi.');
+        else alert('Giriş başarısız oldu veya iptal edildi.');
+      }
+    });
+
+    document.getElementById('google-logout-btn')?.addEventListener('click', async () => {
+      const isConfirmed = await showCustomConfirm('Google Drive bağlantısını kesmek istediğinize emin misiniz?');
+      if (!isConfirmed) return;
+      await window.api.googleLogout();
+      await updateSyncUI();
+    });
+
+    document.getElementById('google-sync-now-btn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('google-sync-now-btn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="ms-Icon ms-Icon--Sync" aria-hidden="true" style="animation: spin 1s linear infinite;"></i> Eşitleniyor...';
+      btn.disabled = true;
+
+      const res = await window.api.googleSyncNow();
+      if (res.success) {
+        if (res.action === 'downloaded') {
+          // reload data
+          const data = await window.api.readData();
+          if (data) {
+            notes = data.notes || [];
+            reminders = data.reminders || [];
+            renderNotes();
+            renderReminders();
+          }
+          if (window.api.showAlert) window.api.showAlert('Verileriniz Google Drive üzerinden başarıyla güncellendi.');
+        } else {
+          if (window.api.showAlert) window.api.showAlert('Verileriniz Google Drive\'a başarıyla yüklendi.');
+        }
+      } else {
+        if (window.api.showAlert) window.api.showAlert('Senkronizasyon hatası: ' + res.error);
+      }
+      
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    });
+
+    if (window.api.onSyncCompleted) {
+      window.api.onSyncCompleted(async (action) => {
+        if (action === 'downloaded') {
+          const data = await window.api.readData();
+          if (data) {
+            notes = data.notes || [];
+            reminders = data.reminders || [];
+            renderNotes();
+            renderReminders();
+          }
+          if (window.api.showNotification) {
+            window.api.showNotification({
+              id: 'sync-done',
+              title: 'Hatırlat Bana - Senkronizasyon',
+              body: 'Notlarınız Google Drive üzerinden güncellendi.'
+            });
+          }
+        }
+      });
+    }
+  }
 }
 
 // --- Navigation ---

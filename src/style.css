@@ -689,3 +689,4 @@ html[data-theme="dark"] .fluent-select {
   color: white;
   border-color: var(--accent-color);
 }
+@keyframes spin { 100%% { transform: rotate(360deg); } } 

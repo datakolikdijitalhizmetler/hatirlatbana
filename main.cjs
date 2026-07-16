@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, Notification, Tray, Menu, nativeImage, dial
 const path = require('path');
 const fs = require('fs');
 const { autoUpdater } = require('electron-updater');
+const googleSync = require('./googleSync.cjs');
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -108,6 +109,24 @@ if (!gotTheLock) {
 
   app.whenReady().then(() => {
   createWindow();
+
+  // Initial Sync check
+  if (googleSync.isLoggedIn()) {
+    setTimeout(() => {
+      googleSync.getCloudModifiedTime().then(async (remoteTime) => {
+        let localTime = 0;
+        if (fs.existsSync(dataFilePath)) {
+          localTime = fs.statSync(dataFilePath).mtimeMs;
+        }
+        if (remoteTime && remoteTime > (localTime + 60000)) {
+          await googleSync.downloadFromDrive(dataFilePath);
+          if (mainWindow) mainWindow.webContents.send('sync-completed', 'downloaded');
+        } else if (localTime > 0) {
+          await googleSync.uploadToDrive(dataFilePath);
+        }
+      }).catch(err => console.error('Startup sync failed:', err));
+    }, 3000); // Wait 3 seconds after startup
+  }
 
   // Create Tray Icon
   const icon = nativeImage.createFromPath(path.join(__dirname, 'icon.png'));
@@ -235,12 +254,71 @@ ipcMain.handle('read-data', async () => {
   return { notes: [], reminders: [] };
 });
 
+let syncTimeout = null;
+
 ipcMain.handle('save-data', async (event, data) => {
   try {
     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
+    
+    if (googleSync.isLoggedIn()) {
+      if (syncTimeout) clearTimeout(syncTimeout);
+      syncTimeout = setTimeout(() => {
+        googleSync.uploadToDrive(dataFilePath).catch(err => console.error('Auto-sync failed:', err));
+      }, 5000);
+    }
+
     return { success: true };
   } catch (error) {
     console.error('Error saving data:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Google Sync IPC
+ipcMain.handle('google-status', () => {
+  return googleSync.isLoggedIn();
+});
+
+ipcMain.handle('google-login', async () => {
+  return new Promise((resolve) => {
+    googleSync.loginWithGoogle(
+      () => {
+        googleSync.downloadFromDrive(dataFilePath).then((remoteTime) => {
+          if (remoteTime && mainWindow) {
+            mainWindow.webContents.send('sync-completed', 'downloaded');
+          }
+        }).catch(err => console.error(err));
+        resolve(true);
+      },
+      (err) => resolve(false)
+    );
+  });
+});
+
+ipcMain.handle('google-logout', () => {
+  googleSync.logout();
+  return true;
+});
+
+ipcMain.handle('google-sync-now', async () => {
+  try {
+    if (!googleSync.isLoggedIn()) return { success: false, error: 'Not logged in' };
+    
+    const remoteTime = await googleSync.getCloudModifiedTime();
+    let localTime = 0;
+    if (fs.existsSync(dataFilePath)) {
+      localTime = fs.statSync(dataFilePath).mtimeMs;
+    }
+
+    // Give a 1 minute buffer to avoid constant back-and-forth due to minor upload delays
+    if (remoteTime && remoteTime > (localTime + 60000)) {
+      await googleSync.downloadFromDrive(dataFilePath);
+      return { success: true, action: 'downloaded' };
+    } else {
+      await googleSync.uploadToDrive(dataFilePath);
+      return { success: true, action: 'uploaded' };
+    }
+  } catch (error) {
     return { success: false, error: error.message };
   }
 });

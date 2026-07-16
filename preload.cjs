@@ -17,5 +17,10 @@ contextBridge.exposeInMainWorld('api', {
   updateTrayLang: (options) => ipcRenderer.send('update-tray-lang', options),
   onUpdateStatus: (callback) => ipcRenderer.on('update-status', (_event, status) => callback(status)),
   installUpdate: () => ipcRenderer.send('install-update'),
-  getAppVersion: () => ipcRenderer.invoke('get-app-version')
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  googleStatus: () => ipcRenderer.invoke('google-status'),
+  googleLogin: () => ipcRenderer.invoke('google-login'),
+  googleLogout: () => ipcRenderer.invoke('google-logout'),
+  googleSyncNow: () => ipcRenderer.invoke('google-sync-now'),
+  onSyncCompleted: (callback) => ipcRenderer.on('sync-completed', (_event, action) => callback(action))
 });

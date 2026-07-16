@@ -1,6 +1,6 @@
 {
   "name": "hatirlatbana",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "main": "main.cjs",
@@ -58,6 +58,8 @@
     "vite": "^8.1.1"
   },
   "dependencies": {
-    "electron-updater": "^6.8.9"
+    "electron-updater": "^6.8.9",
+    "googleapis": "^173.0.0",
+    "server-destroy": "^1.0.1"
   }
 }
